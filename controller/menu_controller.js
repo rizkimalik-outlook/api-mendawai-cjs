@@ -3,13 +3,25 @@ const response = require('../helper/json_response');
 
 const main_menu = async function (req, res) {
     if (req.method !== 'GET') return res.status(405).end();
-    const mainmenu = await knex('menu');
+    const { user_level } = req.params;
 
-    for (let i = 0; i < mainmenu.length; i++) {
-        const menu_modul_data = await knex('menu_modul').where({ menu_id: mainmenu[i].menu_id });
-        mainmenu[i].menu_modul = menu_modul_data;
+    const menu_access = await knex('menu_access')
+        .leftOuterJoin('menu', 'menu_access.menu_id', '=', 'menu.menu_id')
+        .select('menu_access.access', 'menu_access.user_level', 'menu_access.menu_id', 'menu_access.menu_modul_id', 'menu.menu_name', 'menu.path', 'menu.icon', 'menu.is_root')
+        .where({ user_level, access: 'menu' })
+        .orderBy('menu_id', 'ASC');
+
+    for (let i = 0; i < menu_access.length; i++) {
+        const menu_modul = await knex('menu_access')
+            .leftOuterJoin('menu_modul', 'menu_access.menu_modul_id', '=', 'menu_modul.menu_modul_id')
+            .select('menu_access.access', 'menu_access.user_level', 'menu_access.menu_modul_id', 'menu_modul.menu_modul_name', 'menu_modul.path', 'menu_modul.icon', 'menu_modul.is_root')
+            .where('menu_access.menu_id', menu_access[i].menu_id)
+            .andWhere('menu_access.access', 'modul')
+            .andWhere('menu_access.user_level', user_level)
+
+        menu_access[i].menu_modul = menu_modul;
     }
-    response.ok(res, mainmenu)
+    response.ok(res, menu_access)
 }
 
 const menu = async function (req, res) {
@@ -41,7 +53,6 @@ const menu_access = async function (req, res) {
         const { menu_name } = await knex('menu').select('menu_name').where({ menu_id: res_menu_access[i].menu_id }).first();
         res_menu_access[i].menu_name = menu_name;
     }
-
     response.ok(res, res_menu_access)
 }
 
