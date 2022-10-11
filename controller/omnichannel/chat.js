@@ -20,13 +20,13 @@ const join_chat = async function (req, res) {
             response.ok(res, result);
         }
         else {
-            response.error(res, 'error', 'sosmed/join_chat');
+            response.error(res, 'error', 'chat/join_chat');
         }
 
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/join_chat', error);
+        logger('chat/join_chat', error);
     }
 }
 
@@ -65,7 +65,7 @@ const conversation_chats = async function (req, res) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/conversation_chats', error);
+        logger('chat/conversation_chats', error);
     }
 }
 
@@ -81,7 +81,7 @@ const end_chat = async function (req, res) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/end_chat', error);
+        logger('chat/end_chat', error);
     }
 
 }
@@ -105,7 +105,7 @@ const history_chats = async function (req, res) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/history_chats', error);
+        logger('chat/history_chats', error);
     }
 }
 
@@ -239,7 +239,7 @@ const send_message_customer = async function (req) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/send_message_customer', error);
+        logger('chat/send_message_customer', error);
     }
 }
 
@@ -288,7 +288,7 @@ const send_message_agent = async function (req) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/send_message_agent', error);
+        logger('chat/send_message_agent', error);
     }
 }
 
@@ -307,7 +307,7 @@ const update_socket = async function (data) {
     }
     catch (error) {
         console.log(error);
-        logger('sosmed/update_socket', error);
+        logger('chat/update_socket', error);
     }
 }
 

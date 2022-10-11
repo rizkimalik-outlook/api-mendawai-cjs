@@ -105,7 +105,7 @@ module.exports = function (app) {
     
     app.prefix('/ticket',  function (api) {
         api.route('/').get(ticket.index);
-        api.route('/store').post(ticket.store);
+        api.route('/store').post(ticket.store); //insert ticket
         api.route('/update').put(ticket.update);
         api.route('/show/:ticket_number').get(ticket.show);
         api.route('/publish').post(ticket.publish);
@@ -121,17 +121,14 @@ module.exports = function (app) {
         api.route('/data_ticket').post(todolist.data_ticket);
     });
     
-    app.prefix('/sosmed', function (api) {
+    app.prefix('/omnichannel', function (api) {
         api.route('/join_chat').post(chat.join_chat);
         api.route('/list_customers').get(chat.list_customers);
         api.route('/conversation_chats').post(chat.conversation_chats);
         api.route('/end_chat').post(chat.end_chat);
+        api.route('/list_call').post(call.list_call);
     });
     
-    app.prefix('/call', function (api) {
-        api.route('/list').post(call.list_call);
-        // api.route('/insert').post(call.insert_call);
-    });
 
     app.prefix('/hooks', function (api) {
         api.route('/facebook/token').post(facebook.facebook_token);
