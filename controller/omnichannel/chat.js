@@ -10,7 +10,6 @@ const { UploadAttachment } = require('../upload_controller');
 const join_chat = async function (req, res) {
     try {
         const data = req.body;
-
         if (data.email && data.flag_to === 'customer') {
             const result = await customer_join(data);
             response.ok(res, result);
@@ -22,7 +21,6 @@ const join_chat = async function (req, res) {
         else {
             response.error(res, 'error', 'chat/join_chat');
         }
-
     }
     catch (error) {
         console.log(error);
@@ -35,8 +33,8 @@ const list_customers = async function (req, res) {
 
     const list_customers = await knex.raw(`
         SELECT a.chat_id,a.customer_id,b.name,a.email,a.agent_handle,b.uuid as uuid_customer,b.connected, c.uuid as uuid_agent,
-        (select count(*) from chats WHERE flag_to='customer' AND chat_id=a.chat_id and flag_notif is null) as total_chat 
-        FROM chats a
+        (select count(*) from tChat WHERE flag_to='customer' AND chat_id=a.chat_id and flag_notif is null) as total_chat 
+        FROM tChat a
         LEFT JOIN mcustomer b ON a.email=b.email
         LEFT JOIN msuser c ON a.agent_handle=c.username
         WHERE a.flag_end='N' AND a.flag_to='customer' AND a.agent_handle='${agent}' 
@@ -51,8 +49,8 @@ const conversation_chats = async function (req, res) {
     try {
         const { chat_id, customer_id } = req.body;
 
-        await knex('chats').update({ flag_notif: '1' }).where({ chat_id, customer_id }); //flag read notif
-        const conversations = await knex('chats')
+        await knex('tChat').update({ flag_notif: '1' }).where({ chat_id, customer_id }); //flag read notif
+        const conversations = await knex('tChat')
             .select('chat_id', 'customer_id', 'name', 'email', 'flag_to', 'message', 'date_create', 'channel', 'flag_notif','file_name','file_type','file_size','file_url', 'file_origin')
             .where({ chat_id, customer_id, flag_end: 'N' })
             .orderBy('id', 'asc')
@@ -73,7 +71,7 @@ const end_chat = async function (req, res) {
     try {
         const { chat_id, customer_id } = req.body;
         const res_endchat = await knex.raw(`
-            UPDATE chats SET flag_end='Y' WHERE chat_id='${chat_id}' AND customer_id='${customer_id}'
+            UPDATE tChat SET flag_end='Y' WHERE chat_id='${chat_id}' AND customer_id='${customer_id}'
             -- INSERT INTO chats_end SELECT * FROM chats WHERE flag_end='Y'
             -- DELETE chats WHERE flag_end='Y'
         `);
@@ -91,8 +89,8 @@ const history_chats = async function (req, res) {
     try {
         const { chat_id, customer_id } = req.body;
 
-        await knex('chats').update({ flag_notif: '1' }).where({ chat_id, customer_id }); //flag read notif
-        const conversations = await knex('chats')
+        await knex('tChat').update({ flag_notif: '1' }).where({ chat_id, customer_id }); //flag read notif
+        const conversations = await knex('tChat')
             .select('chat_id', 'customer_id', 'name', 'email', 'flag_to', 'message', 'date_create', 'channel', 'flag_notif')
             .where({ chat_id, customer_id, flag_end: 'N' })
             .orderBy('id', 'asc')
@@ -136,7 +134,7 @@ const customer_join = async function (data) {
         await knex('mcustomer').update({ uuid: data.uuid, connected: data.connected }).where({ email: data.email });
     }
 
-    const chat = await knex('chats').select('chat_id')
+    const chat = await knex('tChat').select('chat_id')
         .where({
             email: data.email,
             flag_to: 'customer',
@@ -147,7 +145,7 @@ const customer_join = async function (data) {
 
     const chat_id = chat ? chat.chat_id : generate_chatid;
     if (!chat) {
-        await knex('chats')
+        await knex('tChat')
             .insert([{
                 chat_id: chat_id,
                 message: 'Joined Chat',
@@ -163,7 +161,7 @@ const customer_join = async function (data) {
     }
 
     // get result data & send
-    const result = await knex('chats')
+    const result = await knex('tChat')
         .where({
             email: data.email,
             flag_to: 'customer',
@@ -210,14 +208,16 @@ const send_message_customer = async function (req) {
             attachment
         } = req;
         const file_type = file_name ? path.extname(file_name) : null;
+        const message_type = attachment ? 'file' : 'text';
 
-        await knex('chats')
+        await knex('tChat')
             .insert([{
                 chat_id,
                 customer_id,
                 name,
                 email,
                 message,
+                message_type,
                 agent_handle,
                 file_origin, 
                 file_name, 
@@ -259,14 +259,16 @@ const send_message_agent = async function (req) {
             attachment
         } = req;
         const file_type = file_name ? path.extname(file_name) : null;
+        const message_type = attachment ? 'file' : 'text';
 
-        await knex('chats')
+        await knex('tChat')
             .insert([{
                 chat_id,
                 customer_id,
                 name,
                 email,
                 message,
+                message_type,
                 agent_handle,
                 file_origin, 
                 file_name, 
