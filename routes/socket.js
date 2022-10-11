@@ -2,7 +2,7 @@
 
 const socket_chat = require("./socket_chat");
 const socket_webrtc = require("./socket_webrtc");
-const { update_socket } = require("../controller/sosmed_controller");
+const { update_socket } = require("../controller/omnichannel/chat");
 
 //? socket.broadcast.emit = public chat
 //? socket.to(room).emit = private chat
