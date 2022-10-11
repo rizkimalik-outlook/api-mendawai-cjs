@@ -4,7 +4,7 @@ const {
     send_message_customer, 
     send_message_agent, 
     update_socket 
-} = require("../controller/sosmed_controller");
+} = require("../controller/omnichannel/chat");
 
 //? socket.broadcast.emit = public chat
 //? socket.to(room).emit = private chat
