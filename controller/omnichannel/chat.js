@@ -1,10 +1,10 @@
 'use strict';
 const path = require('path');
 const date = require('date-and-time');
-const knex = require('../config/db_connect');
-const logger = require('../helper/logger');
-const response = require('../helper/json_response');
-const { UploadAttachment } = require('./upload_controller');
+const knex = require('../../config/db_connect');
+const logger = require('../../helper/logger');
+const response = require('../../helper/json_response');
+const { UploadAttachment } = require('../upload_controller');
 
 //? HTTP FUNCTION
 const join_chat = async function (req, res) {

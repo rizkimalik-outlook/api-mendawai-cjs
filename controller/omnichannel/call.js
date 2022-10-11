@@ -1,7 +1,7 @@
 'use strict';
-const knex = require('../config/db_connect');
-const logger = require('../helper/logger');
-const response = require('../helper/json_response');
+const knex = require('../../config/db_connect');
+const logger = require('../../helper/logger');
+const response = require('../../helper/json_response');
 
 //? HTTP FUNCTION
 const list_call = async function (req, res) {

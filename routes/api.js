@@ -1,22 +1,26 @@
 'use strict';
 // const { auth_jwt } = require('../middleware');
 const upload = require('../controller/upload_controller');
-const mail = require('../controller/mail_controller');
 const auth = require('../controller/auth_controller');
 const menu = require('../controller/menu_controller');
 const user = require('../controller/users_controller');
 const customer = require('../controller/customer_controller');
 const channel = require('../controller/customer_channel_controller');
-const socmed = require('../controller/sosmed_controller');
-const call = require('../controller/call_controller');
 const ticket = require('../controller/ticket_controller');
 const todolist = require('../controller/todolist_controller');
-const { facebook, twitter, instagram } = require('../controller/hooks');
+const { 
+    chat, 
+    facebook, 
+    twitter, 
+    instagram, 
+    email,
+    call,
+} = require('../controller/omnichannel');
 const master = require('../controller/master_data');
 
 module.exports = function (app) {
     app.route('/').get(function (req, res) {
-        res.json({ message: "Application Mendawai API running! 🤘🚀" });
+        res.json({ message: "Application API running! 🤘🚀" });
         res.end();
     });
     app.route('/main_menu/:user_level').get(menu.main_menu);
@@ -118,10 +122,10 @@ module.exports = function (app) {
     });
     
     app.prefix('/sosmed', function (api) {
-        api.route('/join_chat').post(socmed.join_chat);
-        api.route('/list_customers').get(socmed.list_customers);
-        api.route('/conversation_chats').post(socmed.conversation_chats);
-        api.route('/end_chat').post(socmed.end_chat);
+        api.route('/join_chat').post(chat.join_chat);
+        api.route('/list_customers').get(chat.list_customers);
+        api.route('/conversation_chats').post(chat.conversation_chats);
+        api.route('/end_chat').post(chat.end_chat);
     });
     
     app.prefix('/call', function (api) {
@@ -141,7 +145,7 @@ module.exports = function (app) {
         api.route('/twitter/mention').post(twitter.twitter_mention);
     });
 
-    app.route('/mail').post(mail.send_mail);
+    app.route('/mail').post(email.send_mail);
     app.route('/upload').post(upload.upload);
     app.route('/read').get(upload.read);
 
