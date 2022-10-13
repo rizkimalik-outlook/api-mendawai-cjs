@@ -24,7 +24,6 @@
     "knex": "^0.95.10",
     "mysql": "^2.18.1",
     "node-windows": "^1.0.0-beta.6",
-    "nodejs-file-downloader": "^4.7.4",
     "nodemailer": "^6.7.2",
     "socket.io": "^4.2.0",
     "tedious": "^14.0.0"
