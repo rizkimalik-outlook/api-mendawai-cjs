@@ -4,7 +4,7 @@ const date = require('date-and-time');
 const knex = require('../../config/db_connect');
 const logger = require('../../helper/logger');
 const response = require('../../helper/json_response');
-const { UploadAttachment } = require('../upload_controller');
+const { UploadAttachment } = require('../../helper/file_manager');
 
 //? HTTP FUNCTION
 const join_chat = async function (req, res) {
@@ -32,15 +32,15 @@ const list_customers = async function (req, res) {
     const { agent } = req.query;
 
     const list_customers = await knex.raw(`
-        SELECT a.chat_id,a.customer_id,b.name,a.email,a.agent_handle,b.uuid as uuid_customer,b.connected, c.uuid as uuid_agent,
+        SELECT a.chat_id,a.customer_id,a.user_id,a.email,a.agent_handle,a.channel,b.name,b.uuid as uuid_customer,b.connected, c.uuid as uuid_agent,
         (select count(*) from tChat WHERE flag_to='customer' AND chat_id=a.chat_id and flag_notif is null) as total_chat 
         FROM tChat a
-        LEFT JOIN mcustomer b ON a.email=b.email
+        LEFT JOIN mcustomer b ON (a.email=b.email OR a.user_id=b.phonenumber)
         LEFT JOIN msuser c ON a.agent_handle=c.username
         WHERE a.flag_end='N' AND a.flag_to='customer' AND a.agent_handle='${agent}' 
-        GROUP BY a.chat_id,a.customer_id,b.name,a.email,a.agent_handle,b.uuid,b.connected,c.uuid
+        GROUP BY a.chat_id,a.customer_id,a.user_id,a.channel,b.name,a.email,a.agent_handle,b.uuid,b.connected,c.uuid
         ORDER BY b.connected DESC
-    `); 
+    `);
 
     response.ok(res, list_customers);
 }
@@ -51,7 +51,7 @@ const conversation_chats = async function (req, res) {
 
         await knex('tChat').update({ flag_notif: '1' }).where({ chat_id, customer_id }); //flag read notif
         const conversations = await knex('tChat')
-            .select('chat_id', 'customer_id', 'name', 'email', 'flag_to', 'message', 'date_create', 'channel', 'flag_notif','file_name','file_type','file_size','file_url', 'file_origin')
+            .select('chat_id', 'customer_id', 'name', 'email', 'flag_to', 'message', 'date_create', 'channel', 'flag_notif', 'file_name', 'file_type', 'file_size', 'file_url', 'file_origin')
             .where({ chat_id, customer_id, flag_end: 'N' })
             .orderBy('id', 'asc')
 
@@ -148,7 +148,9 @@ const customer_join = async function (data) {
         await knex('tChat')
             .insert([{
                 chat_id: chat_id,
+                user_id: data.email,
                 message: 'Joined Chat',
+                message_type: 'text',
                 name: data.username,
                 email: data.email,
                 channel: 'Chat',
@@ -196,14 +198,15 @@ const send_message_customer = async function (req) {
     try {
         const {
             chat_id,
+            user_id,
             customer_id,
             name,
             email,
             message,
             agent_handle,
-            file_origin, 
-            file_name, 
-            file_url, 
+            file_origin,
+            file_name,
+            file_url,
             file_size,
             attachment
         } = req;
@@ -213,16 +216,17 @@ const send_message_customer = async function (req) {
         await knex('tChat')
             .insert([{
                 chat_id,
+                user_id,
                 customer_id,
                 name,
                 email,
                 message,
                 message_type,
                 agent_handle,
-                file_origin, 
-                file_name, 
-                file_type, 
-                file_url, 
+                file_origin,
+                file_name,
+                file_type,
+                file_url,
                 file_size,
                 channel: 'Chat',
                 flag_to: 'customer',
@@ -233,7 +237,8 @@ const send_message_customer = async function (req) {
 
         //upload file attachment
         if (attachment) {
-            await UploadAttachment(attachment,file_name, file_size);
+            const value = { channel: 'chat', attachment, file_name, file_size }
+            await UploadAttachment(value);
         }
 
     }
@@ -247,14 +252,15 @@ const send_message_agent = async function (req) {
     try {
         const {
             chat_id,
+            user_id,
             customer_id,
             name,
             email,
             message,
             agent_handle,
-            file_origin, 
-            file_name, 
-            file_url, 
+            file_origin,
+            file_name,
+            file_url,
             file_size,
             attachment
         } = req;
@@ -264,16 +270,17 @@ const send_message_agent = async function (req) {
         await knex('tChat')
             .insert([{
                 chat_id,
+                user_id,
                 customer_id,
                 name,
                 email,
                 message,
                 message_type,
                 agent_handle,
-                file_origin, 
-                file_name, 
-                file_type, 
-                file_url, 
+                file_origin,
+                file_name,
+                file_type,
+                file_url,
                 file_size,
                 channel: 'Chat',
                 flag_to: 'agent',
@@ -284,7 +291,8 @@ const send_message_agent = async function (req) {
 
         //upload file attachment
         if (attachment) {
-            await UploadAttachment(attachment,file_name, file_size);
+            const value = { channel: 'chat', attachment, file_name, file_size }
+            await UploadAttachment(value);
         }
 
     }
