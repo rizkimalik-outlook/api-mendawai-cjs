@@ -1,6 +1,5 @@
 'use strict';
 // const { auth_jwt } = require('../middleware');
-const upload = require('../controller/upload_controller');
 const auth = require('../controller/auth_controller');
 const menu = require('../controller/menu_controller');
 const user = require('../controller/users_controller');
@@ -15,6 +14,7 @@ const {
     instagram, 
     email,
     call,
+    whatsapp,
 } = require('../controller/omnichannel');
 const master = require('../controller/master_data');
 
@@ -127,10 +127,12 @@ module.exports = function (app) {
         api.route('/conversation_chats').post(chat.conversation_chats);
         api.route('/end_chat').post(chat.end_chat);
         api.route('/list_call').post(call.list_call);
+        api.route('/whatsapp/sendmessage').post(whatsapp.whatsapp_sendmessage);
     });
     
 
-    app.prefix('/hooks', function (api) {
+    app.prefix('/webhook', function (api) {
+        api.route('/whatsapp/get_messages').post(whatsapp.whatsapp_webhook);
         api.route('/facebook/token').post(facebook.facebook_token);
         api.route('/facebook/messenger').post(facebook.facebook_messenger);
         api.route('/facebook/feed').post(facebook.facebook_feed);
@@ -143,7 +145,5 @@ module.exports = function (app) {
     });
 
     app.route('/mail').post(email.send_mail);
-    app.route('/upload').post(upload.upload);
-    app.route('/read').get(upload.read);
 
 }

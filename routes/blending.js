@@ -11,5 +11,8 @@ module.exports = function (app, io) {
         api.route('/queing_chat').post((req, res) => {
             blending.queing_chat(req, res, io)
         });
+        api.route('/send_message_whatsapp').post((req, res) => {
+            blending.send_message_whatsapp(req, res, io)
+        });
     });
 }

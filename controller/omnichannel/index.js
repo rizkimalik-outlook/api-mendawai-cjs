@@ -4,6 +4,7 @@ const instagram = require('./instagram');
 const chat = require('./chat');
 const email = require('./email');
 const call = require('./call');
+const whatsapp = require('./whatsapp');
 
 module.exports =  {
     facebook,
@@ -12,4 +13,5 @@ module.exports =  {
     chat,
     email,
     call,
+    whatsapp,
 }

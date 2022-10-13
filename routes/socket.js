@@ -2,6 +2,7 @@
 
 const socket_chat = require("./socket_chat");
 const socket_webrtc = require("./socket_webrtc");
+const socket_whatsapp = require("./socket_whatsapp");
 const { update_socket } = require("../controller/omnichannel/chat");
 
 //? socket.broadcast.emit = public chat
@@ -36,6 +37,8 @@ module.exports = function (io) {
 
         socket_chat(socket); //module chat
         socket_webrtc(socket); //module call webrtc
+        socket_whatsapp(socket); //module whatsapp
+      
 
         socket.on('disconnect', (res) => {
             const { username, flag_to, email } = socket.handshake.auth;

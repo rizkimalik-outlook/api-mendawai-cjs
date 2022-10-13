@@ -36,8 +36,20 @@ const queing_chat = function (req, res, io) {
     }
 }
 
+const send_message_whatsapp = function (req, res, io) {
+    try {
+        const data = req.body;
+        io.to(data.agent_handle).emit('return-message-whatsapp', data);
+        response.ok(res, data);
+    } catch (error) {
+        console.log(error);
+        logger('blending/send_message_whatsapp', error);
+    }
+}
+
 module.exports = {
     send_message_cust,
     send_message_agent,
     queing_chat,
+    send_message_whatsapp,
 }
