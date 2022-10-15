@@ -45,7 +45,7 @@ const DownloadAttachment = async function (value) {
         let dataBase64 = '';
         let fileName = '';
         if (message_type === 'image') {
-            fileName = message_id + '.png';
+            fileName = message_id + '.jpeg';
             dataBase64 = message_raw.imageMessage.jpegThumbnail;
         }
         const url = `${directory + fileName}`;
