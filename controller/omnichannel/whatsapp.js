@@ -2,6 +2,7 @@ const knex = require('../../config/db_connect');
 const date = require('date-and-time');
 const axios = require('axios');
 const { response, logger, file_manager } = require('../../helper');
+const APP_URL = process.env.APP_URL;
 const WA_API_URL = process.env.WA_API_URL;
 const WA_API_KEY = process.env.WA_API_KEY;
 
@@ -11,8 +12,6 @@ const whatsapp_webhook = async function (req, res) {
         const data = req.body;
         const now = new Date();
         const generate_chatid = date.format(now, 'YYYYMMDDHHmmSSSmmSSS');
-        const customer_id = await insert_customer(data);
-
         const chat = await knex('tChat').select('chat_id', 'agent_handle')
             .where({
                 user_id: data.sender_phone,
@@ -21,10 +20,13 @@ const whatsapp_webhook = async function (req, res) {
                 channel: 'Whatsapp',
             }).first();
 
-        const chat_id = chat ? chat.chat_id : generate_chatid;
+        data.customer_id = await insert_customer(data);;
+        data.chat_id = chat ? chat.chat_id : generate_chatid;
+        data.channel = 'Whatsapp';
+
         await knex('tChat')
             .insert([{
-                chat_id: chat_id,
+                chat_id: data.chat_id,
                 user_id: data.sender_phone,
                 message: data.message_text,
                 message_type: data.message_type,
@@ -32,8 +34,8 @@ const whatsapp_webhook = async function (req, res) {
                 email: data.sender_phone,
                 // agent_handle: chat.agent_handle,
                 post_id: data.message_id,
-                channel: 'Whatsapp',
-                customer_id: customer_id,
+                channel: data.channel,
+                customer_id: data.customer_id,
                 flag_to: 'customer',
                 status_chat: 'open',
                 flag_end: 'N',
@@ -42,8 +44,9 @@ const whatsapp_webhook = async function (req, res) {
             }]);
 
         if (data.message_type !== 'text') {
-            data.channel = 'whatsapp';
-            file_manager.DownloadAttachment(data);
+            const url = file_manager.DownloadAttachment(data);
+            data.url = url;
+            insert_attachment(data);
         }
         response.ok(res, data);
     }
@@ -134,6 +137,34 @@ const insert_sendmessage = async function (data) {
             flag_end: 'N',
             date_create: knex.fn.now()
         }]);
+}
+
+const insert_attachment = async function (data) {
+    let filesize = 0;
+    let filename = '';
+    if (data.message_type === 'image') {
+        filename = data.message_id + '.jpeg';
+        filesize = data.message_raw.imageMessage.fileLength;
+    } 
+    else if(data.message_type === 'document') {
+        filesize = data.message_raw.documentMessage.fileLength;
+    }
+    else if(data.message_type === 'video') {
+        filesize = data.message_raw.videoMessage.fileLength;
+    }
+
+    if (filename) {
+        await knex('tChat_File')
+        .insert([{
+            chat_id: data.chat_id,
+            message_id: data.message_id,
+            file_origin: filename,
+            file_name: filename,
+            file_type: data.message_type,
+            file_url: APP_URL + '/' + data.url,
+            file_size: filesize,
+        }]);
+    }
 }
 
 module.exports = {
