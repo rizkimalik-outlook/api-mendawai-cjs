@@ -1,8 +1,8 @@
 'use strict';
 
-const socket_chat = require("./socket_chat");
-const socket_webrtc = require("./socket_webrtc");
-const socket_whatsapp = require("./socket_whatsapp");
+const socket_chat = require("../controller/socket/socket_chat");
+const socket_webrtc = require("../controller/socket/socket_webrtc");
+const socket_whatsapp = require("../controller/socket/socket_whatsapp");
 const { update_socket } = require("../controller/omnichannel/chat");
 
 //? socket.broadcast.emit = public chat

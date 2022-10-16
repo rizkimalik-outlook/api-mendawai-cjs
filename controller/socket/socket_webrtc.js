@@ -1,6 +1,6 @@
 'use strict';
 
-const { insert_call, update_call } = require("../controller/omnichannel/call");
+const { insert_call, update_call } = require("../omnichannel/call");
 
 //? socket.broadcast.emit = public chat
 //? socket.to(room).emit = private chat
